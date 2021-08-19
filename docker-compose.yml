@@ -1,0 +1,78 @@
+version: '3.3'
+
+services: 
+  # db
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - git-data:/var/lib/postgresql/data
+    ports: 
+      - "5000:5432"
+    networks:
+      - app-network
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres 
+
+  # git
+  git:
+    build: ./git/
+    image: git
+    container_name: git
+    hostname: git-ssh-server
+    restart: unless-stopped
+    ports:
+      - 22:22
+    networks:
+      - app-network
+    volumes: 
+      - git-storage:/var/git
+
+  # api
+  node:
+    image: node:15.0.1
+    user: node
+    working_dir: /home/node/api
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./api:/home/node/api
+    networks:
+      - app-network
+    ports:
+      - '3000:3000'
+    command: 'npm start'
+  
+  # ssl
+  ssl:
+    image: certbot/certbot     
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - 8070:8070
+
+  # proxy
+  nginx:
+    image: nginx:latest
+    container_name: web-proxy
+    restart: unless-stopped
+    networks:
+      - app-network
+    volumes:
+      - ./nginx/node.conf:/etc/nginx/conf.d/node.template
+    ports:
+      - '8080:80'
+    command: 'bash -c "cat /etc/nginx/conf.d/node.template > /etc/nginx/conf.d/default.conf && nginx -g ''daemon off;''"'
+  
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  git-storage:
+  git-data:
