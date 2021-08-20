@@ -19,6 +19,8 @@ RUN addgroup git
 
 RUN useradd -p $(openssl passwd -1 1234) -g git git
 
+RUN mkhomedir_helper git
+
 RUN chown git:git /var/git
 
 RUN apt-get update && apt-get install -y openssh-server

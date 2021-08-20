@@ -30,4 +30,8 @@ INSERT INTO users (username,email,pw) VALUES ('samerbahri98','samer.bahri@ieee.o
 
 INSERT INTO repos (repo_name, created_by) (SELECT 'dodecahedron',id FROM users WHERE username='samerbahri98')
 
-SELECT  FROM repos JOIN users ON (repos.created_by = users.id);
+SELECT * FROM repos JOIN users ON (repos.created_by = users.id);
+
+SELECT * FROM repos;
+
+TRUNCATE TABLE repos;

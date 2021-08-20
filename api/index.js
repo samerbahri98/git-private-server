@@ -13,6 +13,7 @@ app.get('/', function(req, res) {
 });
 
 app.use('/api/repos', require('./routes/repos'))
+app.use('/api/clone',require('./routes/clone'))
 // app.use('/api/users', require('./routes/users'))
 // app.use('/api/auth',require('./routes/auth'))
 

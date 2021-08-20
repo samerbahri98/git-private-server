@@ -59,33 +59,55 @@ class Repo {
 				`SELECT 
 				repos.id AS id, 
 				repos.repo_name AS name, 
-				repos.created_by AS createdById,
+				users.id AS createdById,
 				repos.created_at AS createdAt,
 				users.username AS createdByUsername,
 				users.email AS createdByEmail
 				FROM repos JOIN users
 				ON repos.created_by = users.id
-				WHERE repo_name=$1;
+				WHERE repos.repo_name=$1;
 				`,
 				[this.#name],
-				(err, res) => {
-					if (err) console.log(err);
+				async (err, res) => {
+					if (err) {
+						console.log(err);
+						reject(err);
+						return;
+					}
 					const data = res.rows[0];
-
+					// console.log(data)
 					this.setAttributes(
 						data.name,
-						data.createdybid,
+						data.createdbyid,
 						data.id,
 						data.createdbyusername,
 						data.createdbyemail,
 						data.createdat
 					);
+					console.log(this.info())
 					resolve(this.info());
 				}
 			);
 		});
 	};
-	create = () => {};
+	create = (creator) => {
+		return new Promise((resolve, reject) => {
+			conn.query(
+				`INSERT INTO repos (repo_name, created_by) (SELECT $1, id FROM users WHERE username=$2);
+				`,
+				[this.#name, creator],
+				async (err, res) => {
+					if (err) {
+						console.log(err);
+						reject(err);
+						return;
+					}
+					await this.search();
+					resolve(await this.info());
+				}
+			);
+		});
+	};
 }
 
 module.exports = Repo;
